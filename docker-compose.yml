@@ -1,0 +1,11 @@
+version '2'
+
+services:
+  mongo:
+    image: mongo
+  node:
+    build: node
+    ports:
+      - '8080:80'
+    links:
+      - mongo
