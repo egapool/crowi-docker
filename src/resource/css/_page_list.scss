@@ -1,0 +1,57 @@
+
+.crowi.main-container .main .content-main .timeline-body { // {{{
+  .revision-path {
+    margin-top: 1.6em;
+    margin-bottom: 0;
+    border: solid 2px #ddd;
+    border-bottom: none;
+    padding: 16px;
+    background: #ddd;
+  }
+  .revision-body {
+    font-size: 14px;
+    border: solid 2px #ddd;
+    padding: 16px;
+    background: #fdfdfd;
+  }
+} // }}}
+
+.page-list {
+  .page-list-container {
+    line-height: 1.6em;
+    font-size: 15px;
+  }
+
+  .page-list-ul {
+    padding-left: 0;
+
+    > li {
+      list-style: none;
+      line-height: 1.8em;
+
+      .page-list-option {
+        float: right;
+        margin-left: 4px;
+      }
+
+      .picture {
+        width: 16px;
+        height: 16px;
+      }
+
+      > a {
+        display: inline;
+        padding: 0 4px;
+        font-size: 1.1em;
+        color: #666;
+
+        strong {
+          color: #333;
+        }
+      }
+
+      > span.page-list-meta {
+      }
+    }
+  }
+}

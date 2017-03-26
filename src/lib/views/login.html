@@ -1,0 +1,193 @@
+{% extends 'layout/single-nologin.html' %}
+
+{% block html_title %}{{ t('Sign in') }} · {% endblock %}
+
+{% block content_main %}
+
+<h1 class="login-page">
+  {% if config.crowi['app:title'] == 'Crowi' %}
+    <img src="/logo/135x32.png" alt="Crowi">
+  {% else %}
+    {{ config.crowi['app:title'] }}<br>
+    <img src="/logo/100x11_w.png" alt="powered by Crowi">
+  {% endif %}
+</h1>
+
+<div class="login-dialog-container flip-container col-md-5">
+
+<div class="login-dialog flipper {% if req.query.register or req.body.registerForm or isRegistering or googleId %}to-flip{% endif %}" id="login-dialog">
+
+  <div class="login-dialog-inner front">
+    <h2>{{ t('Sign in') }}</h2>
+
+    <div id="login-form-errors">
+      {% set message = req.flash('warningMessage') %}
+      {% if message.length %}
+      <div class="alert alert-danger">
+        {{ message }}
+      </div>
+      {% endif %}
+
+      {% if req.form.errors.length > 0 %}
+      <div class="alert alert-danger">
+        <ul>
+        {% for error in req.form.errors %}
+          <li>{{ error }}</li>
+        {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+    </div>
+    <form role="form" action="/login" method="post">
+      <div class="input-group">
+        <span class="input-group-addon"><i class="fa fa-envelope"></i></span>
+        <input type="text" class="form-control" placeholder="E-mail" name="loginForm[email]">
+      </div>
+
+      <div class="input-group">
+        <span class="input-group-addon"><i class="fa fa-key"></i></span>
+        <input type="password" class="form-control" placeholder="Password" name="loginForm[password]">
+      </div>
+
+      <input type="hidden" name="_csrf" value="{{ csrf() }}">
+      <input type="submit" class="btn btn-primary btn-lg btn-block" value="{{ t('Sign in') }}">
+    </form>
+
+    <hr>
+
+    <div class="row">
+      {% if googleLoginEnabled() %}
+      <div class="col-md-8">
+        <p>{{ t('Sign in by Google Account') }}</p>
+        <form role="form" action="/login/google" method="get">
+          <button type="submit" class="btn btn-block btn-google"><i class="fa fa-google-plus-square"></i> {{ t('Sign in') }}</button>
+          <input type="hidden" name="_csrf" value="{{ csrf() }}">
+        </form>
+      </div>
+      {% endif %}
+    </div>
+
+    {% if config.crowi['security:registrationMode'] != 'Closed' %}
+    <p class="bottom-text"><a href="#register" id="register"><i class="fa fa-pencil"></i> {{ t('Sign up is here') }}</a></p>
+    {% endif %}
+  </div>
+
+  {% if config.crowi['security:registrationMode'] != 'Closed' %}
+  <div class="register-dialog-inner back">
+
+    <h2>{{ t('Sign up') }}</h2>
+
+    {% if config.crowi['security:registrationMode'] == 'Restricted' %}
+    <p class="alert alert-warning">
+      {{ t('page_register.notice.restricted') }}<br>
+      {{ t('page_register.notice.restricted_defail') }}
+    </p>
+    {% endif %}
+
+    {% if googleId %}
+    <div class="google-info alert alert-info">
+      {% if googleImage %}
+      <p class="text-center">
+        <img src="{{ googleImage }}" class="picture picture-rounded picture-lg">
+      </p>
+      {% endif %}
+      <code>{{ googleEmail }}</code> {{ t('page_register with this Google Account') }}<br>
+      {{ t('page_register.notice.google_account_continue') }}
+    </div>
+    {% endif %}
+
+    <div id="register-form-errors">
+      {% set message = req.flash('registerWarningMessage') %}
+      {% if message.length %}
+      <div class="alert alert-danger">
+        {% for msg in message %}
+        {{ msg }}<br>
+        {% endfor  %}
+      </div>
+      {% endif %}
+
+      {% if req.form.errors.length > 0 %}
+      <div class="alert alert-danger">
+        <ul>
+        {% for error in req.form.errors %}
+          <li>{{ error }}</li>
+        {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+    </div>
+
+    <form role="form" method="post" action="/register" id="register-form">
+      <input type="hidden" class="form-control" name="registerForm[googleId]" value="{{ googleId|default(req.body.registerForm.googleId) }}">
+
+      <label>{{ t('User ID') }}</label>
+      <div class="input-group" id="input-group-username">
+        <span class="input-group-addon"><strong>@</strong></span>
+        <input type="text" class="form-control" placeholder="{{ t('Example') }}: taroyama" name="registerForm[username]" value="{{ req.body.registerForm.username }}" required>
+      </div>
+      <p class="help-block">
+      <span id="help-block-username" class="text-danger"></span>
+      {{ t('page_register.form_help.user_id') }}
+      </p>
+
+      <label>{{ t('Name') }}</label>
+      <div class="input-group">
+        <span class="input-group-addon"><i class="fa fa-user"></i></span>
+        <input type="text" class="form-control" placeholder="{{ t('Example') }}: {{ t('Taro Yamada') }}" name="registerForm[name]" value="{{ googleName|default(req.body.registerForm.name) }}" required>
+      </div>
+
+      <label>{{ t('Email') }}</label>
+      <div class="input-group">
+        <span class="input-group-addon"><i class="fa fa-envelope"></i></span>
+        <input type="email" class="form-control" placeholder="E-mail" name="registerForm[email]" value="{{ googleEmail|default(req.body.registerForm.email) }}" required>
+      </div>
+      {% if config.crowi['security:registrationWhiteList'] && config.crowi['security:registrationWhiteList'].length %}
+      <p class="help-block">
+        {{ t('page_register.form_help.email') }}
+      </p>
+      <ul>
+        {% for em in config.crowi['security:registrationWhiteList'] %}
+        <li><code>{{ em }}</code></li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+
+      <label>{{ t('Password') }}</label>
+      <div class="input-group">
+        <span class="input-group-addon"><i class="fa fa-key"></i></span>
+        <input type="password" class="form-control" placeholder="Password" name="registerForm[password]" required>
+      </div>
+      <p class="help-block">
+        {{ t('page_register.form_help.password') }}
+      </p>
+
+      {% if googleImage %}
+        <input type="hidden" name="registerForm[googleImage]" value="{{ googleImage }}">
+      {% endif  %}
+      <input type="hidden" name="_csrf" value="{{ csrf() }}">
+      <input type="submit" class="btn btn-primary btn-lg btn-block" value="{{ t('Sign up') }}">
+    </form>
+
+    <hr>
+
+    <div class="row">
+      {% if googleLoginEnabled() %}
+      <div class="col-md-6">
+        <p>{{ t('Sign up with Google Account') }}</p>
+        <form role="form" method="post" action="/register/google">
+          <input type="hidden" name="_csrf" value="{{ csrf() }}">
+          <button type="submit" class="btn btn-block btn-google"><i class="fa fa-google-plus-square"></i> {{ t('Login') }}</button>
+        </form>
+      </div>
+      {% endif %}
+    </div>
+
+    <p class="bottom-text"><a href="#login" id="login"><i class="fa fa-sign-out"></i> {{ t('Sign in is here') }}</a></p>
+  </div>
+  {% endif %} {# if registrationMode == Closed #}
+
+</div>
+
+</div>
+
+{% endblock %}
