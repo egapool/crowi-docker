@@ -1,11 +1,28 @@
-version '2'
+version: '2'
 
 services:
   mongo:
     image: mongo
+    environment:
+      MONGODB_PASSWORD: "password"
+      MONGODB_USER: "user"
+      MONGODB_DATABASE: "crowi"
+
   node:
     build: node
     ports:
       - '8080:80'
     links:
       - mongo
+    volumes:
+      - ./src:/home/app/src
+      - /home/app/node_modules
+    environment:
+      PASSWORD_SEED: somesecretstring
+      MONGO_URI: mongodb://user:password@localhost/crowi
+    command: bash -c "cd /home/app/src && npm install && npm cache clean && node app.js"
+
+  data:
+    image: busybox
+    volumes:
+      - ./misc/data:/data/db
