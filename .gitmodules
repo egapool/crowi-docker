@@ -1,0 +1,3 @@
+[submodule "crowi"]
+	path = crowi
+	url = git@github.com:egapool/crowi.git
